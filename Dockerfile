@@ -24,7 +24,7 @@ RUN apt-get install -y apt-utils build-essential locales
 RUN apt-get install -y libffi-dev libssl-dev libyaml-dev
 
 # Install Python
-RUN apt-get install -y python3-full python3-pip
+RUN apt-get install -y python3-dev python3-pip python3-yaml python3-setuptools
 
 # Install other utilities
 RUN apt-get install -y software-properties-common rsyslog systemd systemd-cron sudo iproute2
@@ -34,7 +34,12 @@ RUN apt-get clean \
     && rm -Rf /var/lib/apt/lists/* \
     && rm -Rf /usr/share/doc && rm -Rf /usr/share/man
 
-# Install Ansible via Pip with system package break
+RUN sed -i 's/^\($ModLoad imklog\)/#\1/' /etc/rsyslog.conf
+
+# Fix potential UTF-8 errors with ansible-test.
+RUN locale-gen en_US.UTF-8
+
+# Install Ansible via Pip.
 RUN pip3 install $pip_packages --break-system-packages
 
 COPY initctl_faker .
